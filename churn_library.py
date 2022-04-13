@@ -131,7 +131,7 @@ def perform_eda(df):
         print("Error in performing eda")
     
 
-def encoder_helper(df, category_lst, response):
+def encoder_helper(df, category_lst, response="_churn"):
     '''
     helper function to turn each categorical column into a new column with
     propotion of churn for each category - associated with cell 15 from the notebook
@@ -144,10 +144,15 @@ def encoder_helper(df, category_lst, response):
     output:
             df: pandas dataframe with new columns for
     '''
-    pass
+    for col in cols:
+        groups = df.groupby(category_lst).mean()['Churn']
+        lst = []
+            for val in df[category_lst]:
+                lst.append(groups.loc[val])
+        df[col+response] = lst
+    return df
 
-
-def perform_feature_engineering(df, response):
+def perform_feature_engineering(df, response="_churn"):
     '''
     input:
               df: pandas dataframe
@@ -159,6 +164,17 @@ def perform_feature_engineering(df, response):
               y_train: y training data
               y_test: y testing data
     '''
+    df = encoder_helper(df, ["Gender", "Education_Level", "Marital_Status", "Card_Category"], response)
+    X_feature = df['Customer_Age', 'Dependent_count', 'Months_on_book',
+             'Total_Relationship_Count', 'Months_Inactive_12_mon',
+             'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',
+             'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1', 'Total_Trans_Amt',
+             'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio',
+             'Gender_Churn', 'Education_Level_Churn', 'Marital_Status_Churn', 
+             'Income_Category_Churn', 'Card_Category_Churn']
+    y_feature = df['Churn']
+    X_train, X_test, y_train, y_test = train_test_split(X_feature, y_feature, test_size= 0.3, random_state=42)
+    return X_train, X_test, y_train, y_test
 
 def classification_report_image(y_train,
                                 y_test,
