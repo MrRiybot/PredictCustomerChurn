@@ -31,23 +31,105 @@ def import_data(pth):
     output:
             df: pandas dataframe
     '''	
-	try: 
-        return df.read_csv(pth)
+	try:
+        df = pd.read_csv(pth)
+        df['Churn'] = df['Attrition_Flag'].apply(lambda val: 0 if val == "Existing Customer" else 1)
+        return df
     except FileNotFoundError:
         print("The file does not exist")
+    except KeyError:
+        print("Attrition_Flag column missing")
 
+def perform_churn_hist(df):
+    '''
+    perform customer churn histplot on df and save figure to image folder
+    input :
+            df: pandas dataframe
+    
+    output: 
+            None
+    '''
+    plt.figure(figsize=(20,10)) 
+    df['Churn'].hist();
+    plt.xlabel("0- employee not customer 1- customer churn")
+    plt.ylabel("number of customers")
+    plt.savefig('images/churn_hist.png')
+    
+def perform_age_hist(df):
+    '''
+    perform customer age histplot on df and save figure to image folder
+    input :
+            df: pandas dataframe
+    
+    output: 
+            None
+    '''
+    plt.figure(figsize=(20,10)) 
+    df['Customer_Age'].hist();
+    plt.xlabel("Customer ages")
+    plt.ylabel("Number of Customers")
+    plt.savefig('images/age_hist.png')
+
+def perform_marital_status_bar(df):
+        '''
+    perform marital status bar on df and save figure to image folder
+    input :
+            df: pandas dataframe
+    
+    output: 
+            None
+    '''
+    plt.figure(figsize=(20,10)) 
+    df.Marital_Status.value_counts('normalize').plot(kind='bar');
+    plt.title("Marital status for customers")
+    plt.ylabel("Portion of marital status customers")
+    plt.legend()
+    plt.savefig('images/marital_status_bar')
+
+def perform_total_trans_dist(df):
+    '''
+    perform total trans customer on df and save figure to image folder
+    input :
+            df: pandas dataframe
+    
+    output: 
+            None
+    '''
+    plt.figure(figsize=(20,10))
+    sns.histplot(df['Total_Trans_Ct'], color="blue", label="100% Equities", kde=True, stat="density", linewidth=0)
+    plt.savefig('images/total_trans.png')
+
+def perform_heatmap_figure(df):
+    '''
+    perform heatmap on df and save figure to image folder
+    input :
+            df: pandas dataframe
+    
+    output: 
+            None
+    '''
+    plt.figure(figsize=(20,10))
+    sns.heatmap(df.corr(), annot=False, cmap='Dark2_r', linewidths = 2)
+    plt.savefig('images/heatmap.png')
 
 def perform_eda(df):
     '''
     perform eda on df and save figures to images folder
     input:
             df: pandas dataframe
-
+    
     output:
             None
     '''
-	pass
-
+    try:
+        perform_churn_hist(df)
+        perform_age_hist(df)
+        perform_marital_status_bar(df)
+        perform_total_trans_dist(df)
+        perform_heatmap_figure(df)
+    except:
+        print("Error in performing eda")
+    
 
 def encoder_helper(df, category_lst, response):
     '''
